@@ -21,6 +21,8 @@ body {
     border-radius: 25px;
     box-shadow: 0 25px 60px rgba(0,0,0,0.25);
     text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 h1 { color: #ff4d6d; }
 .question { font-size: 18px; color: #333; margin: 20px 0; }
@@ -47,6 +49,17 @@ input {
     margin-bottom: 10px;
 }
 .volume { margin-top: 10px; font-size: 13px; }
+
+.result-list {
+    text-align: left;
+    margin-top: 15px;
+    font-size: 14px;
+}
+.result-list h3 {
+    margin-bottom: 5px;
+}
+.correct { color: green; }
+.wrong { color: red; }
 </style>
 </head>
 <body>
@@ -54,12 +67,11 @@ input {
 <div id="quizContainer"></div>
 
 <script>
-// 💖 QUESTIONS
 const quizData = [
     { type:"choice", question:"What is my Full Name?", answer:"A",
       choices:{A:"Niño Michael Gimena Saragena", B:"Niño Michael Gimenez Saragena", C:"Niño Michael Gibara Saragena", D:"Niño Michael Gevera Saragena"} },
 
-    { type:"text", question:"When is my Birthday? Ex. January 01, 2002", answer:"march 07, 2004" },
+    { type:"text", question:"When is my Birthday?", answer:"march 07, 2004" },
 
     { type:"choice", question:"What is my nickname?", answer:"C",
       choices:{A:"Mike", B:"Nino", C:"Kel", D:"Migz"} },
@@ -73,11 +85,12 @@ const quizData = [
     { type:"choice", question:"What is my hobby?", answer:"A",
       choices:{A:"Playing Guitar", B:"Gaming", C:"Cycling", D:"Drawing"} },
 
-    { type:"text", question:"Who is the woman I love? Ex. John Perez Doe", answer:"isabel asio jangalay" }
+    { type:"text", question:"Who is the woman I love?", answer:"isabel asio jangalay" }
 ];
 
 let currentIndex = 0;
 let score = 0;
+let results = []; // ✅ store correct/wrong
 let correctSound, wrongSound;
 
 function createQuizHTML() {
@@ -137,34 +150,43 @@ function loadQuestion(){
 }
 
 function nextQuestion(){
-    setTimeout(() => {
-        currentIndex++;
-        if(currentIndex >= quizData.length){
-            showFinalChoiceScreen();
-        } else {
-            loadQuestion();
-        }
-    }, 400);
+    currentIndex++;
+    if(currentIndex >= quizData.length){
+        showFinalChoiceScreen();
+    } else {
+        loadQuestion();
+    }
+}
+
+function recordResult(isCorrect){
+    results.push({
+        question: quizData[currentIndex].question,
+        correct: isCorrect
+    });
 }
 
 function checkChoice(choice){
-    if(choice === quizData[currentIndex].answer){
+    const isCorrect = choice === quizData[currentIndex].answer;
+    if(isCorrect){
         score++;
         correctSound.play();
     } else {
         wrongSound.play();
     }
+    recordResult(isCorrect);
     nextQuestion();
 }
 
 function checkText(){
     const input = document.getElementById("textAnswer").value.toLowerCase().trim();
-    if(input === quizData[currentIndex].answer){
+    const isCorrect = input === quizData[currentIndex].answer;
+    if(isCorrect){
         score++;
         correctSound.play();
     } else {
         wrongSound.play();
     }
+    recordResult(isCorrect);
     nextQuestion();
 }
 
@@ -179,21 +201,32 @@ function showFinalChoiceScreen(){
     `;
 }
 
-// ⭐ FINAL RESULT (PASSING SCORE = 5)
+// ⭐ FINAL RESULT
 function finalAnswer(isYes){
     const passed = score >= 5;
 
+    let correctList = "";
+    let wrongList = "";
+
+    results.forEach(r => {
+        if(r.correct) correctList += `<li class="correct">✅ ${r.question}</li>`;
+        else wrongList += `<li class="wrong">❌ ${r.question}</li>`;
+    });
+
     document.getElementById("quizContainer").innerHTML = `
         <div class="quiz-card">
-            <h1>
-                ${isYes && passed ? "We'll be together 💖" :
-                  isYes && !passed ? "You tried, but not enough 😔" :
-                  "😢"}
-            </h1>
-            <p style="margin-top:15px;font-size:18px;">
-                Final Score: <strong>${score} / ${quizData.length}</strong><br>
-                ${passed ? "✅ Passed" : "❌ Failed (Passing score is 5)"}
-            </p>
+            <h1>${isYes && passed ? "We'll be together 💖" : isYes ? "You tried 😔" : "😢"}</h1>
+
+            <p><strong>Final Score:</strong> ${score} / ${quizData.length}</p>
+            <p>${passed ? "✅ Passed" : "❌ Failed (Passing score is 5)"}</p>
+
+            <div class="result-list">
+                <h3>Correct Answers</h3>
+                <ul>${correctList || "<li>None</li>"}</ul>
+
+                <h3>Wrong Answers</h3>
+                <ul>${wrongList || "<li>None</li>"}</ul>
+            </div>
         </div>
     `;
 }
