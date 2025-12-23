@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Lovers Quiz 💖</title>
-
 <style>
 body {
     margin: 0;
@@ -14,7 +13,6 @@ body {
     justify-content: center;
     align-items: center;
 }
-
 .quiz-card {
     background: #fff;
     width: 90%;
@@ -24,265 +22,167 @@ body {
     box-shadow: 0 25px 60px rgba(0,0,0,0.25);
     text-align: center;
 }
-
-h1 {
-    color: #ff4d6d;
-}
-
+h1 { color: #ff4d6d; }
 .hearts {
-    font-size: 24px;
+    font-size: 26px;
     margin: 10px 0;
+    animation: pulse 1.5s infinite;
 }
-
-.question {
-    font-size: 18px;
-    color: #333;
-    margin: 20px 0;
-}
-
+.hearts.fast { animation: fastBeat 0.6s infinite; }
+.hearts.shake { animation: shake 0.4s; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@keyframes fastBeat { 0% { transform: scale(1); } 30% { transform: scale(1.25); } 60% { transform: scale(1); } 100% { transform: scale(1.2); } }
+@keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+.question { font-size: 18px; color: #333; margin: 20px 0; }
 button {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 30px;
-    background: linear-gradient(135deg, #ff4d6d, #ff758f);
-    color: white;
-    font-size: 15px;
-    cursor: pointer;
-    transition: 0.3s;
+    width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 30px;
+    background: linear-gradient(135deg, #ff4d6d, #ff758f); color: white; font-size: 15px; cursor: pointer; transition: 0.3s;
 }
-
-button:hover {
-    transform: scale(1.05);
-}
-
+button:hover { transform: scale(1.05); }
 input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 30px;
-    border: 1px solid #ddd;
-    text-align: center;
-    font-size: 15px;
-    margin-bottom: 10px;
+    width: 100%; padding: 12px; border-radius: 30px; border: 1px solid #ddd; text-align: center; font-size: 15px; margin-bottom: 10px;
 }
-
-.message {
-    margin-top: 12px;
-    font-weight: bold;
-    color: #ff4d6d;
-}
+.message { margin-top: 12px; font-weight: bold; color: #ff4d6d; }
+.volume { margin-top: 10px; font-size: 13px; }
 </style>
 </head>
-
 <body>
 
-<!-- Sound Effects -->
-<audio id="correctSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_3c3b1b1f59.mp3"></audio>
-<audio id="wrongSound" src="https://cdn.pixabay.com/audio/2022/03/10/audio_5c7c08c7c1.mp3"></audio>
-
-<div class="quiz-card" id="quiz">
-    <h1>Lovers Quiz 💖</h1>
-    <h1>Good Luck Miss Jangalay 💖</h1>
-    <div class="hearts" id="lives"></div>
-    <div class="question" id="question"></div>
-
-    <div id="choices"></div>
-
-    <div id="textBox" style="display:none;">
-        <input type="text" id="textAnswer" placeholder="Type your answer 💌">
-        <button onclick="checkText()">Submit</button>
-    </div>
-
-    <div class="message" id="message"></div>
-</div>
+<div id="quizContainer"></div>
 
 <script>
-/* ===================== QUESTIONS ===================== */
-let questions = [
-{
-    type: "choice",
-    question: "What is my Full Name?",
-    answer: "A",
-    choices: {
-        A: "Niño Michael Gimena Saragena",
-        B: "Niño Michael Gimenez Saragena",
-        C: "Niño Michael Gibara Saragena",
-        D: "Niño Michael Gevera Saragena"
-    }
-},
-{
-    type: "text",
-    question: "When is my Birthday? (Ex: January 01, 2005)",
-    answer: "march 07, 2004"
-},
-{
-    type: "choice",
-    question: "What is my nickname?",
-    answer: "C",
-    choices: {
-        A: "Mike",
-        B: "Nino",
-        C: "Kel",
-        D: "Migz"
-    }
-},
-{
-    type: "choice",
-    question: "What is my favorite color?",
-    answer: "B",
-    choices: {
-        A: "Red",
-        B: "Yellow",
-        C: "Blue",
-        D: "Green"
-    }
-},
-{
-    type: "choice",
-    question: "What is my favorite pet?",
-    answer: "D",
-    choices: {
-        A: "Dog",
-        B: "Bird",
-        C: "Fish",
-        D: "Cat"
-    }
-},
-{
-    type: "choice",
-    question: "What is my hobby?",
-    answer: "A",
-    choices: {
-        A: "Playing Guitar",
-        B: "Gaming",
-        C: "Cycling",
-        D: "Drawing"
-    }
-},
-{
-    type: "text",
-    question: "Who is the woman I love? (Complete name)",
-    answer: "isabel Asio jangalay"
-}
+const quizData = [
+    { type:"choice", question:"What is my Full Name?", answer:"A", choices:{A:"Niño Michael Gimena Saragena", B:"Niño Michael Gimenez Saragena", C:"Niño Michael Gibara Saragena", D:"Niño Michael Gevera Saragena"} },
+    { type:"text", question:"When is my Birthday?", answer:"march 07, 2004" },
+    { type:"choice", question:"What is my nickname?", answer:"C", choices:{A:"Mike", B:"Nino", C:"Kel", D:"Migz"} },
+    { type:"text", question:"Who is the woman I love?", answer:"isabel asio jangalay" }
 ];
 
-/* ===================== VARIABLES ===================== */
-let index = 0;
+let currentIndex = 0;
 let lives = 3;
-
-const correctSound = document.getElementById("correctSound");
-const wrongSound = document.getElementById("wrongSound");
-
 let audioUnlocked = false;
 
-/* ===================== AUDIO UNLOCK ===================== */
-function unlockAudio() {
+let correctSound, wrongSound, heartbeatSound;
+
+function createQuizHTML() {
+    document.getElementById("quizContainer").innerHTML = `
+        <div class="quiz-card" id="quiz">
+            <h1>Lovers Quiz 💖</h1>
+            <div class="hearts" id="lives"></div>
+            <div class="question" id="question"></div>
+            <div id="choices"></div>
+            <div id="textBox" style="display:none;">
+                <input type="text" id="textAnswer" placeholder="Type your answer 💌">
+                <button onclick="checkText()">Submit</button>
+            </div>
+            <div class="message" id="message"></div>
+            <div class="volume">🔊 Volume <input type="range" min="0" max="1" step="0.05" value="0.6" oninput="setVolume(this.value)"></div>
+
+            <audio id="correctSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_3c3b1b1f59.mp3"></audio>
+            <audio id="wrongSound" src="https://cdn.pixabay.com/audio/2022/03/10/audio_5c7c08c7c1.mp3"></audio>
+            <audio id="heartbeatSound" src="https://cdn.pixabay.com/audio/2022/03/09/audio_81a3d0e98c.mp3" loop></audio>
+        </div>
+    `;
+
+    correctSound = document.getElementById("correctSound");
+    wrongSound = document.getElementById("wrongSound");
+    heartbeatSound = document.getElementById("heartbeatSound");
+
+    document.addEventListener("click", unlockAudioOnce, {once:true});
+    loadQuestion();
+}
+
+function unlockAudioOnce() {
     if (!audioUnlocked) {
-        correctSound.play().then(() => {
-            correctSound.pause();
-            correctSound.currentTime = 0;
-        });
-        wrongSound.play().then(() => {
-            wrongSound.pause();
-            wrongSound.currentTime = 0;
+        [correctSound, wrongSound, heartbeatSound].forEach(a => {
+            a.play().then(()=>{ a.pause(); a.currentTime=0; });
         });
         audioUnlocked = true;
-        document.removeEventListener("click", unlockAudio);
     }
 }
-document.addEventListener("click", unlockAudio);
 
-/* ===================== FUNCTIONS ===================== */
-function updateLives() {
-    document.getElementById("lives").innerHTML = "❤️".repeat(lives);
+function setVolume(v){
+    correctSound.volume = wrongSound.volume = heartbeatSound.volume = v;
 }
 
-function loadQuestion() {
-    lives = 3; // RESET lives per question
-    updateLives();
-    document.getElementById("message").innerText = "";
+function updateLives(shake=false){
+    const heartsEl = document.getElementById("lives");
+    heartsEl.innerHTML = "❤️".repeat(lives);
+    heartsEl.className = "hearts";
+    if(lives===1) heartsEl.classList.add("fast");
+    else { heartbeatSound.pause(); heartbeatSound.currentTime=0; }
+    if(shake){ heartsEl.classList.add("shake"); setTimeout(()=>heartsEl.classList.remove("shake"),400); }
+}
 
-    let q = questions[index];
+function loadQuestion(){
+    lives=3; updateLives();
+    document.getElementById("message").innerText="";
+    const q = quizData[currentIndex];
     document.getElementById("question").innerText = q.question;
-    document.getElementById("choices").innerHTML = "";
-    document.getElementById("textBox").style.display = "none";
-
-    if (q.type === "choice") {
-        for (let key in q.choices) {
-            let btn = document.createElement("button");
+    document.getElementById("choices").innerHTML="";
+    document.getElementById("textBox").style.display = q.type==="text"?"block":"none";
+    if(q.type==="choice"){
+        for(let key in q.choices){
+            const btn = document.createElement("button");
             btn.innerText = `${key}. ${q.choices[key]}`;
-            btn.onclick = () => checkChoice(key);
+            btn.onclick = ()=>checkChoice(key);
             document.getElementById("choices").appendChild(btn);
         }
     } else {
-        document.getElementById("textBox").style.display = "block";
         document.getElementById("textAnswer").value = "";
     }
 }
 
-function loseLife() {
+function loseLife(){
     lives--;
-    wrongSound.currentTime = 0;
-    wrongSound.play();
-    updateLives();
-    document.getElementById("message").innerText = "Wrong 💔 Try again";
-
-    if (lives === 0) {
-        document.getElementById("quiz").innerHTML = `
-            <h1 style="color:#ff4d6d;">Out of Hearts 💔</h1>
-            <p>Try the same question again</p>
-            <button onclick="retryQuestion()">Try Again 💞</button>
+    wrongSound.currentTime=0; wrongSound.play();
+    updateLives(true);
+    document.getElementById("message").innerText="Wrong 💔 Try again";
+    if(lives===0){
+        document.getElementById("quizContainer").innerHTML = `
+            <div class="quiz-card">
+                <h1>Out of Hearts 💔</h1>
+                <button onclick="restartQuiz()">Try Again 💞</button>
+            </div>
         `;
     }
 }
 
-function retryQuestion() {
-    document.getElementById("quiz").innerHTML = `
-        <h1>Lovers Quiz 💖</h1>
-        <div class="hearts" id="lives"></div>
-        <div class="question" id="question"></div>
-        <div id="choices"></div>
-        <div id="textBox" style="display:none;">
-            <input type="text" id="textAnswer" placeholder="Type your answer 💌">
-            <button onclick="checkText()">Submit</button>
-        </div>
-        <div class="message" id="message"></div>
-    `;
-    loadQuestion();
+function restartQuiz(){
+    currentIndex=0;
+    createQuizHTML();
 }
 
-function nextQuestion() {
-    correctSound.currentTime = 0;
-    correctSound.play();
-    document.getElementById("message").innerText = "Correct 💖";
-
-    setTimeout(() => {
-        index++;
-        if (index === questions.length) {
-            document.body.innerHTML = `
-                <h1 style="color:white;text-align:center;">
-                💖 YOU WIN 💖<br>
-                True love remembers everything 💍
-                </h1>`;
+function nextQuestion(){
+    correctSound.currentTime=0; correctSound.play();
+    setTimeout(()=>{
+        currentIndex++;
+        if(currentIndex >= quizData.length){
+            document.getElementById("quizContainer").innerHTML = `
+                <div style="text-align:center;color:white;">
+                    <h1>💍 Will you be mine forever? 💖</h1>
+                    <p>You passed the test of love.</p>
+                </div>`;
         } else {
             loadQuestion();
         }
-    }, 700);
+    },600);
 }
 
-function checkChoice(choice) {
-    choice === questions[index].answer ? nextQuestion() : loseLife();
+function checkChoice(choice){
+    if(choice === quizData[currentIndex].answer) nextQuestion();
+    else loseLife();
 }
 
-function checkText() {
-    let input = document.getElementById("textAnswer").value.toLowerCase().trim();
-    input === questions[index].answer ? nextQuestion() : loseLife();
+function checkText(){
+    const input = document.getElementById("textAnswer").value.toLowerCase().trim();
+    if(input === quizData[currentIndex].answer) nextQuestion();
+    else loseLife();
 }
 
-/* ===================== START ===================== */
-loadQuestion();
+// Initialize
+createQuizHTML();
+setVolume(0.6);
 </script>
-
 </body>
 </html>
