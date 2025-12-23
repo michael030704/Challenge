@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lovers Edition Quiz 💖</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.quiz-box {
+    width: 90%;
+    max-width: 520px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+h1 { margin-bottom: 10px; }
+
+.hearts {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.question {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 25px;
+    background: #ff4d6d;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #ff1f4d;
+    transform: scale(1.03);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    border: none;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.message {
+    margin-top: 12px;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="quiz-box" id="quiz">
+    <h1>💖 Lovers Edition Quiz 💖</h1>
+    <h1>Dapat 1 attempt ra</h1>
+    <h1>Dapat complete name or date if Asked</h1>
+    <div class="hearts" id="lives"></div>
+    <div class="question" id="question"></div>
+
+    <div id="choices"></div>
+
+    <div id="textBox" style="display:none;">
+        <input type="text" id="textAnswer" placeholder="Type your answer 💌">
+        <button onclick="checkText()">Submit</button>
+    </div>
+
+    <div class="message" id="message"></div>
+</div>
+
+<script>
+let questions = [
+{
+    type: "choice",
+    question: "What is my Full Name?",
+    answer: "A",
+    choices: {
+        A: "Niño Michael Gimena Saragena",
+        B: "Niño Michael Gimenez Saragena",
+        C: "Niño Michael Gibara Saragena",
+        D: "Niño Michael Gevera Saragena"
+    }
+},
+{
+    type: "text",
+    question: "When is my Birthday?",
+    answer: "march 07, 2004"
+},
+{
+    type: "choice",
+    question: "What is my nickname?",
+    answer: "C",
+    choices: {
+        A: "Mike",
+        B: "Nino",
+        C: "Kel",
+        D: "Migz"
+    }
+},
+{
+    type: "choice",
+    question: "What is my favorite color?",
+    answer: "B",
+    choices: {
+        A: "Red",
+        B: "Yellow",
+        C: "Blue",
+        D: "Green"
+    }
+},
+{
+    type: "choice",
+    question: "What is my favorite pet?",
+    answer: "D",
+    choices: {
+        A: "Dog",
+        B: "Bird",
+        C: "Fish",
+        D: "Cat"
+    }
+},
+{
+    type: "choice",
+    question: "What is my hobby?",
+    answer: "A",
+    choices: {
+        A: "Playing Guitar",
+        B: "Gaming",
+        C: "Cycling",
+        D: "Drawing"
+    }
+},
+{
+    type: "text",
+    question: "Who is the woman I love?",
+    answer: "isabel asio jangalay"
+}
+];
+
+let index = 0;
+let lives = 3;
+
+function updateLives() {
+    document.getElementById("lives").innerHTML = "❤️".repeat(lives);
+}
+
+function loadQuestion() {
+    document.getElementById("message").innerText = "";
+    let q = questions[index];
+
+    document.getElementById("question").innerText = q.question;
+    document.getElementById("choices").innerHTML = "";
+    document.getElementById("textBox").style.display = "none";
+
+    if (q.type === "choice") {
+        for (let key in q.choices) {
+            let btn = document.createElement("button");
+            btn.innerText = `${key}. ${q.choices[key]}`;
+            btn.onclick = () => checkChoice(key);
+            document.getElementById("choices").appendChild(btn);
+        }
+    } else {
+        document.getElementById("textBox").style.display = "block";
+        document.getElementById("textAnswer").value = "";
+    }
+}
+
+function loseLife() {
+    lives--;
+    updateLives();
+    document.getElementById("message").innerText = "💔 Wrong answer";
+
+    if (lives === 0) {
+        showTryAgain();
+    }
+}
+
+function showTryAgain() {
+    document.getElementById("quiz").innerHTML = `
+        <h1>💔 Out of Love 💔</h1>
+        <p>You lost all 3 hearts</p>
+        <button onclick="tryAgain()">💞 Try Again</button>
+    `;
+}
+
+function tryAgain() {
+    lives = 3;
+    document.getElementById("quiz").innerHTML = `
+        <h1>💖 Lovers Edition Quiz 💖</h1>
+        <div class="hearts" id="lives"></div>
+        <div class="question" id="question"></div>
+        <div id="choices"></div>
+        <div id="textBox" style="display:none;">
+            <input type="text" id="textAnswer" placeholder="Type your answer 💌">
+            <button onclick="checkText()">Submit</button>
+        </div>
+        <div class="message" id="message"></div>
+    `;
+    updateLives();
+    loadQuestion();
+}
+
+function nextQuestion() {
+    index++;
+    if (index === questions.length) {
+        document.body.innerHTML = `
+            <h1 style="color:white;text-align:center;">
+            💖 You Win 💖<br>
+            True love never forgets 💕
+            </h1>`;
+    } else {
+        loadQuestion();
+    }
+}
+
+function checkChoice(choice) {
+    if (choice === questions[index].answer) {
+        nextQuestion();
+    } else {
+        loseLife();
+    }
+}
+
+function checkText() {
+    let input = document.getElementById("textAnswer").value.toLowerCase().trim();
+    if (input === questions[index].answer) {
+        nextQuestion();
+    } else {
+        loseLife();
+    }
+}
+
+updateLives();
+loadQuestion();
+</script>
+
+</body>
+</html>
