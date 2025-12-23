@@ -23,11 +23,7 @@ body {
     text-align: center;
 }
 h1 { color: #ff4d6d; }
-.hearts {
-    font-size: 26px;
-    margin: 10px 0;
-    animation: pulse 1.5s infinite;
-}
+.hearts { font-size: 26px; margin: 10px 0; animation: pulse 1.5s infinite; }
 .hearts.fast { animation: fastBeat 0.6s infinite; }
 .hearts.shake { animation: shake 0.4s; }
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
@@ -51,10 +47,14 @@ input {
 <div id="quizContainer"></div>
 
 <script>
+// 💖 QUESTIONS
 const quizData = [
     { type:"choice", question:"What is my Full Name?", answer:"A", choices:{A:"Niño Michael Gimena Saragena", B:"Niño Michael Gimenez Saragena", C:"Niño Michael Gibara Saragena", D:"Niño Michael Gevera Saragena"} },
     { type:"text", question:"When is my Birthday?", answer:"march 07, 2004" },
     { type:"choice", question:"What is my nickname?", answer:"C", choices:{A:"Mike", B:"Nino", C:"Kel", D:"Migz"} },
+    { type:"choice", question:"What is my favorite color?", answer:"B", choices:{A:"Red", B:"Yellow", C:"Blue", D:"Green"} },
+    { type:"choice", question:"What is my favorite pet?", answer:"D", choices:{A:"Dog", B:"Bird", C:"Fish", D:"Cat"} },
+    { type:"choice", question:"What is my hobby?", answer:"A", choices:{A:"Playing Guitar", B:"Gaming", C:"Cycling", D:"Drawing"} },
     { type:"text", question:"Who is the woman I love?", answer:"isabel asio jangalay" }
 ];
 
@@ -158,15 +158,31 @@ function nextQuestion(){
     setTimeout(()=>{
         currentIndex++;
         if(currentIndex >= quizData.length){
-            document.getElementById("quizContainer").innerHTML = `
-                <div style="text-align:center;color:white;">
-                    <h1>💍 Will you be mine forever? 💖</h1>
-                    <p>You passed the test of love.</p>
-                </div>`;
+            showFinalChoiceScreen();
         } else {
             loadQuestion();
         }
     },600);
+}
+
+// ✅ FINAL YES/NO SCREEN
+function showFinalChoiceScreen(){
+    document.getElementById("quizContainer").innerHTML = `
+        <div class="quiz-card">
+            <h1>💍 Will you be mine forever? 💖</h1>
+            <p>You passed the test of love.</p>
+            <button onclick="finalAnswer(true)">Yes 💖</button>
+            <button onclick="finalAnswer(false)">No 😢</button>
+        </div>
+    `;
+}
+
+function finalAnswer(isYes){
+    document.getElementById("quizContainer").innerHTML = `
+        <div class="quiz-card">
+            <h1>${isYes ? "We'll be together 💖" : "😢"}</h1>
+        </div>
+    `;
 }
 
 function checkChoice(choice){
