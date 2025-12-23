@@ -2,41 +2,42 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lovers Edition Quiz 💖</title>
+<title>Lovers Quiz 💖</title>
 
 <style>
 body {
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #ff758c, #ff7eb3);
     height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
     display: flex;
     justify-content: center;
     align-items: center;
-    color: white;
 }
 
-.quiz-box {
+.quiz-card {
+    background: #fff;
     width: 90%;
-    max-width: 520px;
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(12px);
-    border-radius: 20px;
+    max-width: 420px;
     padding: 30px;
+    border-radius: 25px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.25);
     text-align: center;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
 }
 
-h1 { margin-bottom: 10px; }
+h1 {
+    color: #ff4d6d;
+}
 
 .hearts {
     font-size: 24px;
-    margin-bottom: 15px;
+    margin: 10px 0;
 }
 
 .question {
-    font-size: 20px;
-    margin-bottom: 20px;
+    font-size: 18px;
+    color: #333;
+    margin: 20px 0;
 }
 
 button {
@@ -44,42 +45,45 @@ button {
     padding: 12px;
     margin: 8px 0;
     border: none;
-    border-radius: 25px;
-    background: #ff4d6d;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #ff4d6d, #ff758f);
     color: white;
-    font-size: 16px;
+    font-size: 15px;
     cursor: pointer;
     transition: 0.3s;
 }
 
 button:hover {
-    background: #ff1f4d;
-    transform: scale(1.03);
+    transform: scale(1.05);
 }
 
 input {
     width: 100%;
     padding: 12px;
-    border-radius: 25px;
-    border: none;
-    font-size: 16px;
+    border-radius: 30px;
+    border: 1px solid #ddd;
     text-align: center;
+    font-size: 15px;
     margin-bottom: 10px;
 }
 
 .message {
     margin-top: 12px;
     font-weight: bold;
+    color: #ff4d6d;
 }
 </style>
 </head>
 
 <body>
 
-<div class="quiz-box" id="quiz">
-    <h1>💖 Lovers Edition Quiz 💖</h1>
-    <h1>Dapat 1 attempt ra</h1>
-    <h1>Dapat complete name or date if Asked</h1>
+<!-- Sound Effects -->
+<audio id="correctSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_3c3b1b1f59.mp3"></audio>
+<audio id="wrongSound" src="https://cdn.pixabay.com/audio/2022/03/10/audio_5c7c08c7c1.mp3"></audio>
+
+<div class="quiz-card" id="quiz">
+    <h1>Lovers Quiz 💖</h1>
+    <h1>Good Luck Miss Jangalay 💖</h1>
     <div class="hearts" id="lives"></div>
     <div class="question" id="question"></div>
 
@@ -94,6 +98,7 @@ input {
 </div>
 
 <script>
+/* ===================== QUESTIONS ===================== */
 let questions = [
 {
     type: "choice",
@@ -108,7 +113,7 @@ let questions = [
 },
 {
     type: "text",
-    question: "When is my Birthday?",
+    question: "When is my Birthday? (Ex: January 01, 2005)",
     answer: "march 07, 2004"
 },
 {
@@ -157,22 +162,48 @@ let questions = [
 },
 {
     type: "text",
-    question: "Who is the woman I love?",
-    answer: "isabel asio jangalay"
+    question: "Who is the woman I love? (Complete name)",
+    answer: "isabel Asio jangalay"
 }
 ];
 
+/* ===================== VARIABLES ===================== */
 let index = 0;
 let lives = 3;
 
+const correctSound = document.getElementById("correctSound");
+const wrongSound = document.getElementById("wrongSound");
+
+let audioUnlocked = false;
+
+/* ===================== AUDIO UNLOCK ===================== */
+function unlockAudio() {
+    if (!audioUnlocked) {
+        correctSound.play().then(() => {
+            correctSound.pause();
+            correctSound.currentTime = 0;
+        });
+        wrongSound.play().then(() => {
+            wrongSound.pause();
+            wrongSound.currentTime = 0;
+        });
+        audioUnlocked = true;
+        document.removeEventListener("click", unlockAudio);
+    }
+}
+document.addEventListener("click", unlockAudio);
+
+/* ===================== FUNCTIONS ===================== */
 function updateLives() {
     document.getElementById("lives").innerHTML = "❤️".repeat(lives);
 }
 
 function loadQuestion() {
+    lives = 3; // RESET lives per question
+    updateLives();
     document.getElementById("message").innerText = "";
-    let q = questions[index];
 
+    let q = questions[index];
     document.getElementById("question").innerText = q.question;
     document.getElementById("choices").innerHTML = "";
     document.getElementById("textBox").style.display = "none";
@@ -192,26 +223,23 @@ function loadQuestion() {
 
 function loseLife() {
     lives--;
+    wrongSound.currentTime = 0;
+    wrongSound.play();
     updateLives();
-    document.getElementById("message").innerText = "💔 Wrong answer";
+    document.getElementById("message").innerText = "Wrong 💔 Try again";
 
     if (lives === 0) {
-        showTryAgain();
+        document.getElementById("quiz").innerHTML = `
+            <h1 style="color:#ff4d6d;">Out of Hearts 💔</h1>
+            <p>Try the same question again</p>
+            <button onclick="retryQuestion()">Try Again 💞</button>
+        `;
     }
 }
 
-function showTryAgain() {
+function retryQuestion() {
     document.getElementById("quiz").innerHTML = `
-        <h1>💔 Out of Love 💔</h1>
-        <p>You lost all 3 hearts</p>
-        <button onclick="tryAgain()">💞 Try Again</button>
-    `;
-}
-
-function tryAgain() {
-    lives = 3;
-    document.getElementById("quiz").innerHTML = `
-        <h1>💖 Lovers Edition Quiz 💖</h1>
+        <h1>Lovers Quiz 💖</h1>
         <div class="hearts" id="lives"></div>
         <div class="question" id="question"></div>
         <div id="choices"></div>
@@ -221,41 +249,38 @@ function tryAgain() {
         </div>
         <div class="message" id="message"></div>
     `;
-    updateLives();
     loadQuestion();
 }
 
 function nextQuestion() {
-    index++;
-    if (index === questions.length) {
-        document.body.innerHTML = `
-            <h1 style="color:white;text-align:center;">
-            💖 You Win 💖<br>
-            True love never forgets 💕
-            </h1>`;
-    } else {
-        loadQuestion();
-    }
+    correctSound.currentTime = 0;
+    correctSound.play();
+    document.getElementById("message").innerText = "Correct 💖";
+
+    setTimeout(() => {
+        index++;
+        if (index === questions.length) {
+            document.body.innerHTML = `
+                <h1 style="color:white;text-align:center;">
+                💖 YOU WIN 💖<br>
+                True love remembers everything 💍
+                </h1>`;
+        } else {
+            loadQuestion();
+        }
+    }, 700);
 }
 
 function checkChoice(choice) {
-    if (choice === questions[index].answer) {
-        nextQuestion();
-    } else {
-        loseLife();
-    }
+    choice === questions[index].answer ? nextQuestion() : loseLife();
 }
 
 function checkText() {
     let input = document.getElementById("textAnswer").value.toLowerCase().trim();
-    if (input === questions[index].answer) {
-        nextQuestion();
-    } else {
-        loseLife();
-    }
+    input === questions[index].answer ? nextQuestion() : loseLife();
 }
 
-updateLives();
+/* ===================== START ===================== */
 loadQuestion();
 </script>
 
